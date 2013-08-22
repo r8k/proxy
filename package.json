@@ -1,0 +1,18 @@
+{
+  "name": "proxy",
+  "description": "stub proxy with redis",
+  "version": "0.0.1",
+  "homepage": "http://github.com/r8k/proxy",
+  "author": {
+    "name": "Rajiv Kilaparti",
+    "email": "rkilaparti@apigee.com"
+  },
+  "dependencies": {
+    "hiredis": "0.1.15",
+    "redis": "0.8.4"
+  },
+  "engines": {
+    "node": ">= 0.8.0"
+  },
+  "readmeFilename": "README.md"
+}
