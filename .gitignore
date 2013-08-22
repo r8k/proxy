@@ -12,3 +12,6 @@ logs
 results
 
 npm-debug.log
+src-doc
+doc
+node_modules
