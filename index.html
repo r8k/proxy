@@ -1,0 +1,93 @@
+<!DOCTYPE html><html lang="en"><head><title>index</title></head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0"><meta name="groc-relative-root" content=""><meta name="groc-document-path" content="index"><meta name="groc-project-path" content="index.js"><link rel="stylesheet" type="text/css" media="all" href="assets/style.css"><script type="text/javascript" src="assets/behavior.js"></script><body><div id="meta"><div class="file-path">index.js</div></div><div id="document"><div class="segment"><div class="comments"><div class="wrapper"><p>[Module Dependencies]
+@type {[CommonJS]}</p></div></div><div class="code"><div class="wrapper"><span class="nx">http</span>    <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;http&#39;</span><span class="p">),</span>
+<span class="nx">https</span>   <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;https&#39;</span><span class="p">),</span>
+<span class="nx">url</span>     <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;url&#39;</span><span class="p">),</span>
+<span class="nx">fs</span>      <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;fs&#39;</span><span class="p">),</span>
+<span class="nx">net</span>     <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;net&#39;</span><span class="p">),</span>
+<span class="nx">zlib</span>    <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;zlib&#39;</span><span class="p">),</span>
+<span class="nx">crypto</span>  <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;crypto&#39;</span><span class="p">),</span>
+<span class="nx">Redis</span>   <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;redis&#39;</span><span class="p">);</span></div></div></div><div class="segment"><div class="comments"><div class="wrapper"><p>[userModule Dependencies]
+@type {[CommonJS]}</p></div></div><div class="code"><div class="wrapper"><span class="nx">Logger</span>  <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./logger&#39;</span><span class="p">),</span>
+<span class="nx">config</span>  <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./config&#39;</span><span class="p">),</span>
+<span class="nx">md5</span>     <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./entropy&#39;</span><span class="p">),</span>
+<span class="nx">utils</span>   <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./utils&#39;</span><span class="p">),</span>
+<span class="nx">testsvr</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./test&#39;</span><span class="p">);</span></div></div></div><div class="segment"><div class="comments"><div class="wrapper"><p>Expose config as globals
+for example <code>redishost</code> etc.</p></div></div><div class="code"><div class="wrapper"><span class="nx">utils</span><span class="p">.</span><span class="nx">configParser</span><span class="p">();</span></div></div></div><div class="segment"><div class="comments"><div class="wrapper"><p>[Logger, for all our needs]
+@type {[Logger]}</p></div></div><div class="code"><div class="wrapper"><span class="nx">log</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Logger</span><span class="p">();</span></div></div></div><div class="segment"><div class="comments"><div class="wrapper"><p>connect to Redis
+@type {[Redis]}</p></div></div><div class="code"><div class="wrapper"><span class="nx">redis</span>  <span class="o">=</span> <span class="nx">Redis</span><span class="p">.</span><span class="nx">createClient</span><span class="p">(</span><span class="nx">redisport</span><span class="p">,</span> <span class="nx">redishost</span><span class="p">);</span>
+<span class="nx">redis</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="nx">utils</span><span class="p">.</span><span class="nx">redisError</span><span class="p">);</span></div></div></div><div class="segment"><div class="comments"><div class="wrapper"><p>[server: our Proxy Server]
+@type {[proxyServer]}</p></div></div><div class="code"><div class="wrapper"><span class="nx">server</span>      <span class="o">=</span> <span class="nx">http</span><span class="p">.</span><span class="nx">createServer</span><span class="p">();</span>
+<span class="nx">server</span><span class="p">.</span><span class="nx">port</span> <span class="o">=</span> <span class="nx">proxyserverport</span><span class="p">;</span>
+<span class="nx">server</span><span class="p">.</span><span class="nx">name</span> <span class="o">=</span> <span class="s1">&#39;ProxyServer&#39;</span><span class="p">;</span></div></div></div><div class="segment"><div class="comments"><div class="wrapper"><p>[OwlServer: Https Listener]
+@type {[proxyServer]}</p></div></div><div class="code"><div class="wrapper"><span class="nx">Owl</span>       <span class="o">=</span> <span class="nx">https</span><span class="p">.</span><span class="nx">createServer</span><span class="p">(</span><span class="nx">https_options</span><span class="p">);</span>
+<span class="nx">Owl</span><span class="p">.</span><span class="nx">port</span>  <span class="o">=</span> <span class="nx">owlserverport</span><span class="p">;</span>
+<span class="nx">Owl</span><span class="p">.</span><span class="nx">name</span>  <span class="o">=</span> <span class="s1">&#39;OwlServer&#39;</span><span class="p">;</span></div></div></div><div class="segment"><div class="comments"><div class="wrapper"><p>[servers arrayList]
+@type {[Array]}</p></div></div><div class="code"><div class="wrapper"><span class="nx">servers</span>     <span class="o">=</span> <span class="p">[</span><span class="nx">server</span><span class="p">,</span> <span class="nx">Owl</span><span class="p">];</span></div></div></div><div class="segment"><div class="comments"><div class="wrapper"><p>[Listen to all incoming http requests]
+@param  {[http request]}  req [http incoming request]
+@param  {[http response]} res [http outgoing response]
+@type {[EventListener]}</p></div></div><div class="code"><div class="wrapper"><span class="nx">server</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;request&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">req</span><span class="p">,</span> <span class="nx">res</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">creq</span> <span class="o">=</span> <span class="nx">utils</span><span class="p">.</span><span class="nx">parseRequest</span><span class="p">(</span><span class="nx">req</span><span class="p">);</span>
+    <span class="kd">var</span> <span class="nx">_options</span> <span class="o">=</span> <span class="nx">utils</span><span class="p">.</span><span class="nx">getOptions</span><span class="p">(</span><span class="nx">creq</span><span class="p">);</span>
+
+    <span class="nx">req</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;close&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">connection</span><span class="p">.</span><span class="nx">destroy</span><span class="p">();</span>
+    <span class="p">});</span>
+    
+    <span class="nx">utils</span><span class="p">.</span><span class="nx">proxyRequest</span><span class="p">(</span><span class="nx">req</span><span class="p">,</span> <span class="nx">_options</span><span class="p">,</span> <span class="nx">creq</span><span class="p">,</span> <span class="nx">res</span><span class="p">);</span>
+<span class="p">});</span>
+
+<span class="nx">Owl</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;request&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">req</span><span class="p">,</span> <span class="nx">res</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">req</span><span class="p">.</span><span class="nx">url</span> <span class="o">=</span> <span class="nx">utils</span><span class="p">.</span><span class="nx">buildRequest</span><span class="p">(</span><span class="nx">req</span><span class="p">);</span>
+    <span class="kd">var</span> <span class="nx">creq</span> <span class="o">=</span> <span class="nx">utils</span><span class="p">.</span><span class="nx">parseRequest</span><span class="p">(</span><span class="nx">req</span><span class="p">);</span>
+    <span class="kd">var</span> <span class="nx">_options</span> <span class="o">=</span> <span class="nx">utils</span><span class="p">.</span><span class="nx">getOptions</span><span class="p">(</span><span class="nx">creq</span><span class="p">);</span>
+
+    <span class="nx">req</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;close&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">connection</span><span class="p">.</span><span class="nx">destroy</span><span class="p">();</span>
+    <span class="p">});</span>
+    
+    <span class="nx">utils</span><span class="p">.</span><span class="nx">proxyRequest</span><span class="p">(</span><span class="nx">req</span><span class="p">,</span> <span class="nx">_options</span><span class="p">,</span> <span class="nx">creq</span><span class="p">,</span> <span class="nx">res</span><span class="p">);</span>
+<span class="p">});</span></div></div></div><div class="segment"><div class="comments"><div class="wrapper"><p>[Listen to all incoming http connects]
+@param  {[http request]}  req    [http incoming request]
+@param  {[tcp socket]}    socket [tcp incoming socket]
+@param  {[Buffer head]}   head   [Buffer::Incoming]
+@type {[EventListener]}</p></div></div><div class="code"><div class="wrapper"><span class="nx">server</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;connect&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">req</span><span class="p">,</span> <span class="nx">socket</span><span class="p">,</span> <span class="nx">head</span><span class="p">)</span> <span class="p">{</span></div></div></div><div class="segment"><div class="comments"><div class="wrapper"><p>w/o this handler, socket is destroyed :: socket.destroy()
+https://github.com/joyent/node/blob/master/lib/<em>http</em>server.js#L381</p></div></div><div class="code"><div class="wrapper">    <span class="kd">var</span> <span class="nx">proxy</span> <span class="o">=</span> <span class="nx">net</span><span class="p">.</span><span class="nx">createConnection</span><span class="p">(</span><span class="nx">owlserverport</span><span class="p">,</span> <span class="nx">LOCAL_HOST</span><span class="p">);</span></div></div></div><div class="segment"><div class="comments"><div class="wrapper"><p>create the listeners outside, for perf reasons.</p></div></div><div class="code"><div class="wrapper">    <span class="nx">proxy</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;connect&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+        <span class="nx">socket</span><span class="p">.</span><span class="nx">write</span><span class="p">(</span><span class="nx">CONN_OK</span> <span class="o">+</span> <span class="nx">CRLF</span> <span class="o">+</span> <span class="nx">PROXY_AGENT</span> <span class="o">+</span> <span class="nx">END_LF</span><span class="p">);</span>
+    <span class="p">});</span>
+
+    <span class="nx">proxy</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span> <span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">socket</span><span class="p">.</span><span class="nx">write</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span>
+    <span class="p">});</span>
+    
+    <span class="nx">socket</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">try</span> <span class="p">{</span>
+            <span class="nx">proxy</span><span class="p">.</span><span class="nx">write</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span>
+        <span class="p">}</span> <span class="k">catch</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span></div></div></div><div class="segment"><div class="comments"><div class="wrapper"><p>do nothing here ..</p></div></div><div class="code"><div class="wrapper">        <span class="p">}</span>
+    <span class="p">});</span></div></div></div><div class="segment"><div class="comments"><div class="wrapper"><p>have some neat logic here ..</p></div></div><div class="code"><div class="wrapper">    <span class="nx">proxy</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span> <span class="s1">&#39;end&#39;</span><span class="p">,</span>  <span class="kd">function</span><span class="p">()</span>  <span class="p">{</span>
+        <span class="nx">socket</span><span class="p">.</span><span class="nx">end</span><span class="p">()</span>
+    <span class="p">});</span>
+    
+    <span class="nx">socket</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;end&#39;</span><span class="p">,</span>  <span class="kd">function</span><span class="p">()</span>  <span class="p">{</span>
+        <span class="nx">proxy</span><span class="p">.</span><span class="nx">end</span><span class="p">()</span>
+    <span class="p">});</span>
+
+    <span class="nx">proxy</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span> <span class="s1">&#39;close&#39;</span><span class="p">,</span><span class="kd">function</span><span class="p">()</span>  <span class="p">{</span>
+        <span class="nx">socket</span><span class="p">.</span><span class="nx">end</span><span class="p">()</span>
+    <span class="p">});</span>
+    
+    <span class="nx">socket</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;close&#39;</span><span class="p">,</span><span class="kd">function</span><span class="p">()</span>  <span class="p">{</span>
+        <span class="nx">proxy</span><span class="p">.</span><span class="nx">end</span><span class="p">()</span>
+    <span class="p">});</span>
+
+    <span class="nx">proxy</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span> <span class="s1">&#39;error&#39;</span><span class="p">,</span><span class="kd">function</span><span class="p">()</span>  <span class="p">{</span>
+        <span class="nx">socket</span><span class="p">.</span><span class="nx">end</span><span class="p">()</span>
+    <span class="p">});</span>
+    
+    <span class="nx">socket</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;error&#39;</span><span class="p">,</span><span class="kd">function</span><span class="p">()</span>  <span class="p">{</span>
+        <span class="nx">proxy</span><span class="p">.</span><span class="nx">end</span><span class="p">()</span>
+    <span class="p">});</span>
+<span class="p">});</span></div></div></div><div class="segment"><div class="comments"><div class="wrapper"><p>[httpServer Error Handler]
+@type {[EventListener]}</p></div></div><div class="code"><div class="wrapper"><span class="nx">utils</span><span class="p">.</span><span class="nx">errorHandler</span><span class="p">(</span><span class="nx">servers</span><span class="p">);</span></div></div></div><div class="segment"><div class="comments"><div class="wrapper"><p>[start the Server]
+@type {[proxyServer]}</p></div></div><div class="code"><div class="wrapper"><span class="nx">utils</span><span class="p">.</span><span class="nx">startServers</span><span class="p">(</span><span class="nx">servers</span><span class="p">);</span></div></div></div><div class="segment"><div class="comments"><div class="wrapper"><p>[process Event Handlers]
+@type {[EventListener]}</p></div></div><div class="code"><div class="wrapper"><span class="nx">process</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;SIGINT&#39;</span><span class="p">,</span> <span class="nx">utils</span><span class="p">.</span><span class="nx">closeServers</span><span class="p">);</span>
+<span class="nx">process</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;SIGTERM&#39;</span><span class="p">,</span> <span class="nx">utils</span><span class="p">.</span><span class="nx">closeServers</span><span class="p">);</span></div></div></div></div></body></html>

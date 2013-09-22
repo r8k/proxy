@@ -1,0 +1,217 @@
+<!DOCTYPE html><html lang="en"><head><title>utils</title></head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0"><meta name="groc-relative-root" content=""><meta name="groc-document-path" content="utils"><meta name="groc-project-path" content="utils.js"><link rel="stylesheet" type="text/css" media="all" href="assets/style.css"><script type="text/javascript" src="assets/behavior.js"></script><body><div id="meta"><div class="file-path">utils.js</div></div><div id="document"><div class="segment"><div class="comments"><div class="wrapper"><p>Expose config as globals
+for example <code>redishost</code> etc.</p></div></div><div class="code"><div class="wrapper"><span class="nx">exports</span><span class="p">.</span><span class="nx">configParser</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">key</span> <span class="k">in</span> <span class="nx">config</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nb">Object</span><span class="p">.</span><span class="nx">defineProperty</span><span class="p">(</span>
+            <span class="nx">global</span>
+          <span class="p">,</span> <span class="nx">key</span>
+          <span class="p">,</span> <span class="nb">Object</span><span class="p">.</span><span class="nx">getOwnPropertyDescriptor</span><span class="p">(</span><span class="nx">config</span><span class="p">,</span> <span class="nx">key</span><span class="p">));</span>
+    <span class="p">}</span>
+<span class="p">}</span></div></div></div><div class="segment"><div class="comments"><div class="wrapper"><p>[parse the request protocol.
+ By default, give Http. Right now,
+ we support only Http, Https]
+@param  {[protocol]} a        [url parsed protocol]
+@return {[http Object]}       [http/https Object]</p></div></div><div class="code"><div class="wrapper"><span class="nx">exports</span><span class="p">.</span><span class="nx">parseProtocol</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">a</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="s2">&quot;http:&quot;</span> <span class="o">===</span> <span class="nx">a</span> <span class="o">?</span> <span class="nx">http</span><span class="o">:</span>
+        <span class="s2">&quot;https:&quot;</span> <span class="o">===</span> <span class="nx">a</span> <span class="o">?</span> <span class="nx">https</span><span class="o">:</span>
+            <span class="nx">http</span><span class="p">;</span>
+<span class="p">};</span></div></div></div><div class="segment"><div class="comments"><div class="wrapper"><p>[buildRequest, for https Incoming
+ Connections, on Sockets]
+@param  {[http Request]} request</p></div></div><div class="code"><div class="wrapper"><span class="nx">exports</span><span class="p">.</span><span class="nx">buildRequest</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">request</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">(</span><span class="s1">&#39;https://&#39;</span> <span class="o">+</span> <span class="nx">request</span><span class="p">.</span><span class="nx">headers</span><span class="p">.</span><span class="nx">host</span> <span class="o">+</span> <span class="nx">request</span><span class="p">.</span><span class="nx">url</span><span class="p">);</span>
+<span class="p">}</span></div></div></div><div class="segment"><div class="comments"><div class="wrapper"><p>[parse httpIncomingRequest, to get
+ original complete Client Request]
+@param  {[http Request]} request</p></div></div><div class="code"><div class="wrapper"><span class="nx">exports</span><span class="p">.</span><span class="nx">parseRequest</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">request</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">creq</span> <span class="o">=</span> <span class="nx">url</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">request</span><span class="p">.</span><span class="nx">url</span><span class="p">);</span>
+    <span class="nx">creq</span><span class="p">.</span><span class="nx">protocol</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">parseProtocol</span><span class="p">(</span><span class="nx">creq</span><span class="p">.</span><span class="nx">protocol</span><span class="p">);</span>
+    <span class="nx">creq</span><span class="p">.</span><span class="nx">port</span> <span class="o">=</span> <span class="nx">creq</span><span class="p">.</span><span class="nx">protocol</span> <span class="o">==</span> <span class="nx">https</span>
+        <span class="o">?</span> <span class="nx">creq</span><span class="p">.</span><span class="nx">port</span> <span class="o">?</span> <span class="nx">creq</span><span class="p">.</span><span class="nx">port</span> <span class="o">:</span> <span class="mi">443</span>
+        <span class="o">:</span> <span class="nx">creq</span><span class="p">.</span><span class="nx">port</span> <span class="o">?</span> <span class="nx">creq</span><span class="p">.</span><span class="nx">port</span> <span class="o">:</span> <span class="mi">80</span><span class="p">;</span>
+    <span class="nx">creq</span><span class="p">.</span><span class="nx">method</span>   <span class="o">=</span> <span class="nx">request</span><span class="p">.</span><span class="nx">method</span><span class="p">;</span>
+    <span class="nx">creq</span><span class="p">.</span><span class="nx">headers</span>  <span class="o">=</span> <span class="nx">request</span><span class="p">.</span><span class="nx">headers</span><span class="p">;</span>
+    <span class="k">delete</span> <span class="nx">creq</span><span class="p">.</span><span class="nx">headers</span><span class="p">.</span><span class="nx">host</span><span class="p">;</span>
+    <span class="k">return</span> <span class="nx">creq</span><span class="p">;</span>
+<span class="p">}</span></div></div></div><div class="segment"><div class="comments"><div class="wrapper"><p>[parse _options for creating httpRequest]
+@param  {[http Request]} request
+@return {[Object]}</p></div></div><div class="code"><div class="wrapper"><span class="nx">exports</span><span class="p">.</span><span class="nx">getOptions</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">request</span><span class="p">)</span> <span class="p">{</span></div></div></div><div class="segment"><div class="comments"><div class="wrapper"><p>request.path = pathname + querystring
+@see [http://nodejs.org/api/url.html]</p></div></div><div class="code"><div class="wrapper">    <span class="k">return</span> <span class="p">{</span>
+        <span class="nx">host</span>    <span class="o">:</span> <span class="nx">request</span><span class="p">.</span><span class="nx">hostname</span><span class="p">,</span>
+        <span class="nx">port</span>    <span class="o">:</span> <span class="nx">request</span><span class="p">.</span><span class="nx">port</span><span class="p">,</span>
+        <span class="nx">method</span>  <span class="o">:</span> <span class="nx">request</span><span class="p">.</span><span class="nx">method</span><span class="p">,</span>
+        <span class="nx">headers</span> <span class="o">:</span> <span class="nx">request</span><span class="p">.</span><span class="nx">headers</span><span class="p">,</span>
+        <span class="nx">path</span>    <span class="o">:</span> <span class="nx">request</span><span class="p">.</span><span class="nx">path</span>
+    <span class="p">};</span>
+<span class="p">}</span></div></div></div><div class="segment"><div class="comments"><div class="wrapper"><p>[createTargetRequest with the options from
+    incomingHttpRequest, after looking up in
+    Redis with the Hash]</p>
+
+<p>@param  {[http Incoming Proxy Request]}     req
+@param  {[httpOptions]}                     _options
+@param  {[client Original Request]}         creq
+@param  {[http Outgoing Proxy Response]}    res
+@param  {[md5-hash]}                        hash
+@param  {[Buffer]}                          buffer</p></div></div><div class="code"><div class="wrapper"><span class="nx">exports</span><span class="p">.</span><span class="nx">createTargetRequest</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">req</span><span class="p">,</span> <span class="nx">_options</span><span class="p">,</span> <span class="nx">creq</span><span class="p">,</span> <span class="nx">res</span><span class="p">,</span> <span class="nx">hash</span><span class="p">,</span> <span class="nx">buffer</span><span class="p">)</span> <span class="p">{</span></div></div></div><div class="segment"><div class="comments"><div class="wrapper"><p>create the targetRequest, with the incoming options</p></div></div><div class="code"><div class="wrapper">    <span class="kd">var</span> <span class="nx">targetRequest</span><span class="p">;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="nx">creq</span><span class="p">.</span><span class="nx">method</span> <span class="o">===</span> <span class="s1">&#39;GET&#39;</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">targetRequest</span> <span class="o">=</span> <span class="nx">creq</span><span class="p">.</span><span class="nx">protocol</span><span class="p">[</span><span class="nx">_options</span><span class="p">.</span><span class="nx">method</span><span class="p">.</span><span class="nx">toLowerCase</span><span class="p">()](</span><span class="nx">_options</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="nx">targetRequest</span> <span class="o">=</span> <span class="nx">creq</span><span class="p">.</span><span class="nx">protocol</span><span class="p">.</span><span class="nx">request</span><span class="p">(</span><span class="nx">_options</span><span class="p">);</span>
+    <span class="p">}</span></div></div></div><div class="segment"><div class="comments"><div class="wrapper"><p>[Listen for httpErrors, and handle appropriately]</p></div></div><div class="code"><div class="wrapper">    <span class="nx">targetRequest</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">utils</span><span class="p">.</span><span class="nx">proxyError</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">res</span><span class="p">);</span>
+    <span class="p">});</span>
+    </div></div></div><div class="segment"><div class="comments"><div class="wrapper"><p>[we listen to response event, for a targetRequest
+ and appropriately, pipe the response to the
+ original sender]</p>
+
+<p>@param  {[Event]}    response        [http response event]
+@param  {[response]} targetResponse  [http response message]</p></div></div><div class="code"><div class="wrapper">    <span class="nx">targetRequest</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;response&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">targetResponse</span><span class="p">)</span> <span class="p">{</span></div></div></div><div class="segment"><div class="comments"><div class="wrapper"><p>@todo [vary: headers]
+split on delimiter, and remove
+these headers, before storing.
+what else needs to be done ?</p></div></div><div class="code"><div class="wrapper">        <span class="nx">targetResponse</span><span class="p">.</span><span class="nx">pipe</span><span class="p">(</span><span class="nx">res</span><span class="p">);</span>
+        <span class="kd">var</span> <span class="nx">responseBody</span> <span class="o">=</span> <span class="p">[];</span>
+        
+        <span class="nx">targetResponse</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">chunk</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">responseBody</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="k">new</span> <span class="nx">Buffer</span><span class="p">(</span><span class="nx">chunk</span><span class="p">));</span>
+        <span class="p">})</span>
+
+        <span class="nx">targetResponse</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;end&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">responseBody</span> <span class="o">=</span> <span class="nx">Buffer</span><span class="p">.</span><span class="nx">concat</span><span class="p">(</span><span class="nx">responseBody</span><span class="p">);</span></div></div></div><div class="segment"><div class="comments"><div class="wrapper"><p>[transfer-encoding: chunked]
+@see [http://en.wikipedia.org/wiki/Chunked<em>transfer</em>encoding]</p></div></div><div class="code"><div class="wrapper">            <span class="k">try</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">targetResponse</span><span class="p">.</span><span class="nx">headers</span><span class="p">[</span><span class="s1">&#39;transfer-encoding&#39;</span><span class="p">].</span><span class="nx">toLowerCase</span><span class="p">()</span> <span class="o">===</span> <span class="s1">&#39;chunked&#39;</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="k">delete</span> <span class="nx">targetResponse</span><span class="p">.</span><span class="nx">headers</span><span class="p">[</span><span class="s1">&#39;content-length&#39;</span><span class="p">];</span>
+                <span class="p">}</span>
+            <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span></div></div></div><div class="segment"><div class="comments"><div class="wrapper"><p>do nothing here ..</p></div></div><div class="code"><div class="wrapper">            <span class="p">}</span></div></div></div><div class="segment"><div class="comments"><div class="wrapper"><p>[content-encoding: gzip, deflate]
+we do not support <code>sdch</code> yet !!
+@see [http://en.wikipedia.org/wiki/HTTP_compression]</p></div></div><div class="code"><div class="wrapper">            <span class="k">switch</span> <span class="p">(</span><span class="nx">targetResponse</span><span class="p">.</span><span class="nx">headers</span><span class="p">[</span><span class="s1">&#39;content-encoding&#39;</span><span class="p">])</span> <span class="p">{</span>
+                <span class="k">case</span> <span class="s1">&#39;gzip&#39;</span><span class="o">:</span>
+                    <span class="nx">zlib</span><span class="p">.</span><span class="nx">unzip</span><span class="p">(</span><span class="nx">responseBody</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">buffer</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
+                            <span class="nx">responseBody</span> <span class="o">=</span> <span class="nx">buffer</span><span class="p">;</span>
+                            <span class="nx">redis</span><span class="p">.</span><span class="nx">hmset</span><span class="p">(</span><span class="nx">hash</span><span class="p">,</span> <span class="s1">&#39;body&#39;</span><span class="p">,</span> <span class="nx">responseBody</span><span class="p">.</span><span class="nx">toString</span><span class="p">(),</span>
+                                <span class="s1">&#39;headers&#39;</span><span class="p">,</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">targetResponse</span><span class="p">.</span><span class="nx">headers</span><span class="p">),</span> <span class="s1">&#39;code&#39;</span><span class="p">,</span> <span class="nx">targetResponse</span><span class="p">.</span><span class="nx">statusCode</span><span class="p">);</span>
+                        <span class="p">}</span>
+                    <span class="p">});</span> <span class="k">break</span><span class="p">;</span>
+                <span class="k">case</span> <span class="s1">&#39;deflate&#39;</span><span class="o">:</span>
+                    <span class="nx">zlib</span><span class="p">.</span><span class="nx">inflate</span><span class="p">(</span><span class="nx">responseBody</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">buffer</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
+                            <span class="nx">responseBody</span> <span class="o">=</span> <span class="nx">buffer</span><span class="p">;</span>
+                            <span class="nx">redis</span><span class="p">.</span><span class="nx">hmset</span><span class="p">(</span><span class="nx">hash</span><span class="p">,</span> <span class="s1">&#39;body&#39;</span><span class="p">,</span> <span class="nx">responseBody</span><span class="p">.</span><span class="nx">toString</span><span class="p">(),</span>
+                                <span class="s1">&#39;headers&#39;</span><span class="p">,</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">targetResponse</span><span class="p">.</span><span class="nx">headers</span><span class="p">),</span> <span class="s1">&#39;code&#39;</span><span class="p">,</span> <span class="nx">targetResponse</span><span class="p">.</span><span class="nx">statusCode</span><span class="p">);</span>
+                        <span class="p">}</span>
+                    <span class="p">});</span> <span class="k">break</span><span class="p">;</span>
+                <span class="k">default</span><span class="o">:</span>
+                    <span class="nx">redis</span><span class="p">.</span><span class="nx">hmset</span><span class="p">(</span><span class="nx">hash</span><span class="p">,</span> <span class="s1">&#39;body&#39;</span><span class="p">,</span> <span class="nx">responseBody</span><span class="p">.</span><span class="nx">toString</span><span class="p">(),</span>
+                        <span class="s1">&#39;headers&#39;</span><span class="p">,</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">targetResponse</span><span class="p">.</span><span class="nx">headers</span><span class="p">),</span> <span class="s1">&#39;code&#39;</span><span class="p">,</span> <span class="nx">targetResponse</span><span class="p">.</span><span class="nx">statusCode</span><span class="p">);</span>
+                    <span class="k">break</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">})</span>
+        
+        <span class="nx">res</span><span class="p">.</span><span class="nx">writeHead</span><span class="p">(</span><span class="nx">targetResponse</span><span class="p">.</span><span class="nx">statusCode</span><span class="p">,</span> <span class="nx">targetResponse</span><span class="p">.</span><span class="nx">headers</span><span class="p">);</span>
+    <span class="p">});</span></div></div></div><div class="segment"><div class="comments"><div class="wrapper"><p>here is the magic, happening</p></div></div><div class="code"><div class="wrapper">    <span class="k">if</span> <span class="p">(</span><span class="nx">datamethods</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="nx">creq</span><span class="p">.</span><span class="nx">method</span><span class="p">))</span> <span class="p">{</span>
+        <span class="nx">targetRequest</span><span class="p">.</span><span class="nx">write</span><span class="p">(</span><span class="nx">buffer</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="nx">req</span><span class="p">.</span><span class="nx">pipe</span><span class="p">(</span><span class="nx">targetRequest</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="nx">targetRequest</span><span class="p">.</span><span class="nx">end</span><span class="p">();</span>
+<span class="p">}</span></div></div></div><div class="segment"><div class="comments"><div class="wrapper"><p>[Lookup Redis, with URI, Buffer to see,
+ if we have already captured this request.
+ Otherwise, route it to the original Backend.]
+@param  {[http Incoming Proxy Request]}     req
+@param  {[httpOptions]}                     _options
+@param  {[client Original Request]}         creq
+@param  {[http Outgoing Proxy Response]}    res
+@param  {[Buffer]}                          buffer</p></div></div><div class="code"><div class="wrapper"><span class="nx">exports</span><span class="p">.</span><span class="nx">redisLookUp</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">req</span><span class="p">,</span> <span class="nx">_options</span><span class="p">,</span> <span class="nx">creq</span><span class="p">,</span> <span class="nx">res</span><span class="p">,</span> <span class="nx">buffer</span><span class="p">)</span> <span class="p">{</span></div></div></div><div class="segment"><div class="comments"><div class="wrapper"><p>@todo [construct uri + buffer with regex,
+based on x-respond-with in request header]</p></div></div><div class="code"><div class="wrapper">    <span class="kd">var</span> <span class="nx">uri</span>    <span class="o">=</span> <span class="nx">req</span><span class="p">.</span><span class="nx">url</span><span class="p">;</span>
+    <span class="kd">var</span> <span class="nx">buffer</span> <span class="o">=</span> <span class="k">typeof</span> <span class="nx">buffer</span> <span class="o">===</span> <span class="s1">&#39;undefined&#39;</span> <span class="o">?</span> <span class="s1">&#39;&#39;</span> <span class="o">:</span> <span class="nx">buffer</span><span class="p">;</span>
+    <span class="kd">var</span> <span class="nx">hash</span>   <span class="o">=</span> <span class="nx">md5</span><span class="p">(</span><span class="nx">uri</span> <span class="o">+</span> <span class="nx">buffer</span><span class="p">);</span></div></div></div><div class="segment"><div class="comments"><div class="wrapper"><p>@todo [cache-control]
+if not ((cachecontrol.test(req.headers.pragma)) || (cachecontrol.test(req.headers['cache-control'])))
+then do redis, else not.</p></div></div><div class="code"><div class="wrapper">    <span class="nx">redis</span><span class="p">.</span><span class="nx">hgetall</span><span class="p">(</span><span class="nx">hash</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">r</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">r</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span></div></div></div><div class="segment"><div class="comments"><div class="wrapper"><p>@todo [content-encoding: gzip, deflate]</p></div></div><div class="code"><div class="wrapper">            <span class="kd">var</span> <span class="nx">body</span> <span class="o">=</span> <span class="nx">r</span><span class="p">.</span><span class="nx">body</span><span class="p">;</span>
+            <span class="kd">var</span> <span class="nx">statusCode</span> <span class="o">=</span> <span class="nx">r</span><span class="p">.</span><span class="nx">code</span><span class="p">;</span>
+            <span class="kd">var</span> <span class="nx">replyHeaders</span> <span class="o">=</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">headers</span><span class="p">);</span>
+            <span class="nx">res</span><span class="p">.</span><span class="nx">writeHead</span><span class="p">(</span><span class="nx">statusCode</span><span class="p">,</span> <span class="nx">replyHeaders</span><span class="p">);</span>
+            <span class="nx">res</span><span class="p">.</span><span class="nx">end</span><span class="p">(</span><span class="nx">body</span><span class="p">);</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="nx">utils</span><span class="p">.</span><span class="nx">createTargetRequest</span><span class="p">(</span><span class="nx">req</span><span class="p">,</span> <span class="nx">_options</span><span class="p">,</span> <span class="nx">creq</span><span class="p">,</span> <span class="nx">res</span><span class="p">,</span> <span class="nx">hash</span><span class="p">,</span> <span class="nx">buffer</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">});</span>
+<span class="p">}</span></div></div></div><div class="segment"><div class="comments"><div class="wrapper"><p>[proxy Incoming httpRequest]
+@param  {[http Incoming Proxy Request]}    req
+@param  {[http Options]}                   _options
+@param  {[client Original Request]}        creq
+@param  {[http Outgoing Proxy Response]}   res</p></div></div><div class="code"><div class="wrapper"><span class="nx">exports</span><span class="p">.</span><span class="nx">proxyRequest</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">req</span><span class="p">,</span> <span class="nx">_options</span><span class="p">,</span> <span class="nx">creq</span><span class="p">,</span> <span class="nx">res</span><span class="p">)</span> <span class="p">{</span></div></div></div><div class="segment"><div class="comments"><div class="wrapper"><p>[implement buffer data for POST &amp; PUT here]
+events are: data, close, end: we need to
+listen to only 'data' <code>event</code> and destroy
+the connection, if buffer exceeds 4096 bytes</p>
+
+<p>@todo [add req.headers to md5-hash]</p></div></div><div class="code"><div class="wrapper">    <span class="kd">var</span> <span class="nx">buffer</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">datamethods</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="nx">creq</span><span class="p">.</span><span class="nx">method</span><span class="p">))</span> <span class="p">{</span>
+        <span class="nx">req</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">chunk</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">buffer</span> <span class="o">+=</span> <span class="nx">chunk</span><span class="p">;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">buffer</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="nx">MAX_BUFF_LIMIT</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">req</span><span class="p">.</span><span class="nx">connection</span><span class="p">.</span><span class="nx">destroy</span><span class="p">();</span>
+            <span class="p">}</span>
+        <span class="p">});</span></div></div></div><div class="segment"><div class="comments"><div class="wrapper"><p>we listen to <code>end</code> event, to compute the entropy
+with the post'ed data. we also check for buffer
+overloads, and destroy the connection.</p></div></div><div class="code"><div class="wrapper">        <span class="nx">req</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;end&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+            <span class="nx">utils</span><span class="p">.</span><span class="nx">redisLookUp</span><span class="p">(</span><span class="nx">req</span><span class="p">,</span> <span class="nx">_options</span><span class="p">,</span> <span class="nx">creq</span><span class="p">,</span> <span class="nx">res</span><span class="p">,</span> <span class="nx">buffer</span><span class="p">);</span>
+        <span class="p">});</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">redisLookUp</span><span class="p">(</span><span class="nx">req</span><span class="p">,</span> <span class="nx">_options</span><span class="p">,</span> <span class="nx">creq</span><span class="p">,</span> <span class="nx">res</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span></div></div></div><div class="segment"><div class="comments"><div class="wrapper"><p>[start proxyServer &amp; others if any]
+@param  {[httpServers Array]} servers</p></div></div><div class="code"><div class="wrapper"><span class="nx">exports</span><span class="p">.</span><span class="nx">startServers</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">servers</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">servers</span><span class="p">.</span><span class="nx">forEach</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">server</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">try</span> <span class="p">{</span>
+            <span class="nx">server</span><span class="p">.</span><span class="nx">listen</span><span class="p">(</span><span class="nx">server</span><span class="p">.</span><span class="nx">port</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+                <span class="nx">log</span><span class="p">.</span><span class="nx">info</span><span class="p">(</span><span class="nx">server</span><span class="p">.</span><span class="nx">name</span> <span class="o">+</span> <span class="s2">&quot; started, listening on port: &quot;</span> <span class="o">+</span> <span class="nx">server</span><span class="p">.</span><span class="nx">port</span><span class="p">);</span>
+            <span class="p">});</span>
+        <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">log</span><span class="p">.</span><span class="nx">info</span><span class="p">(</span><span class="nx">e</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">e</span><span class="p">.</span><span class="nx">code</span> <span class="o">===</span> <span class="s1">&#39;EADDRINUSE&#39;</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">log</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="s1">&#39;Another process is listening on port: &#39;</span> <span class="o">+</span> <span class="nx">server</span><span class="p">.</span><span class="nx">port</span>
+                    <span class="o">+</span> <span class="s1">&#39; for Server: &#39;</span> <span class="o">+</span> <span class="nx">server</span><span class="p">.</span><span class="nx">name</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">};</span>
+    <span class="p">});</span>
+<span class="p">}</span></div></div></div><div class="segment"><div class="comments"><div class="wrapper"><p>[httpServer errorHandler]
+@param  {[httpServers Array]} servers</p></div></div><div class="code"><div class="wrapper"><span class="nx">exports</span><span class="p">.</span><span class="nx">errorHandler</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">servers</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">servers</span><span class="p">.</span><span class="nx">forEach</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">server</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">server</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">err</span><span class="p">.</span><span class="nx">code</span> <span class="o">===</span> <span class="s1">&#39;EADDRINUSE&#39;</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">log</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="s1">&#39;Another process is listening on port: &#39;</span> <span class="o">+</span> <span class="nx">server</span><span class="p">.</span><span class="nx">port</span>
+                    <span class="o">+</span> <span class="s1">&#39; for Server: &#39;</span> <span class="o">+</span> <span class="nx">server</span><span class="p">.</span><span class="nx">name</span><span class="p">);</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="nx">log</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="nx">err</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">});</span>
+    <span class="p">});</span>
+<span class="p">}</span></div></div></div><div class="segment"><div class="comments"><div class="wrapper"><p>[Listen for proxyError]
+@param  {[httpError]} err
+@param  {[http Outgoing Proxy Response]} res</p></div></div><div class="code"><div class="wrapper"><span class="nx">exports</span><span class="p">.</span><span class="nx">proxyError</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">res</span><span class="p">)</span> <span class="p">{</span></div></div></div><div class="segment"><div class="comments"><div class="wrapper"><p>Error Codes
+@see [https://github.com/joyent/libuv/blob/master/include/uv.h#L69]</p></div></div><div class="code"><div class="wrapper">    <span class="k">if</span> <span class="p">(</span><span class="nx">err</span><span class="p">.</span><span class="nx">code</span> <span class="o">===</span> <span class="s1">&#39;ENOTFOUND&#39;</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">res</span><span class="p">.</span><span class="nx">writeHead</span><span class="p">(</span><span class="mi">404</span><span class="p">);</span>
+        <span class="nx">res</span><span class="p">.</span><span class="nx">end</span><span class="p">(</span><span class="s1">&#39;Not Found&#39;</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="nx">res</span><span class="p">.</span><span class="nx">writeHead</span><span class="p">(</span><span class="mi">500</span><span class="p">);</span>
+        <span class="nx">res</span><span class="p">.</span><span class="nx">end</span><span class="p">(</span><span class="s1">&#39;Internal Server Error&#39;</span><span class="p">);</span>
+        <span class="nx">log</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="nx">err</span><span class="p">.</span><span class="nx">message</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span></div></div></div><div class="segment"><div class="comments"><div class="wrapper"><p>[Listener for Redis Errors]
+@param  {[Redis errorObject]} err</p></div></div><div class="code"><div class="wrapper"><span class="nx">exports</span><span class="p">.</span><span class="nx">redisError</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">log</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="nx">err</span><span class="p">.</span><span class="nx">message</span><span class="p">);</span>
+    <span class="nx">log</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="s1">&#39;Shutting down Proxy ..&#39;</span><span class="p">);</span>
+    <span class="nx">utils</span><span class="p">.</span><span class="nx">closeServers</span><span class="p">();</span>
+<span class="p">}</span></div></div></div><div class="segment"><div class="comments"><div class="wrapper"><p>[cleanup signal handler, closes servers,
+ Redis, and does cleanup actions, if any]</p></div></div><div class="code"><div class="wrapper"><span class="nx">exports</span><span class="p">.</span><span class="nx">closeServers</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nx">servers</span><span class="p">.</span><span class="nx">forEach</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">server</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">server</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">log</span><span class="p">.</span><span class="nx">info</span><span class="p">(</span><span class="s1">&#39;SIGTERM received, closing server: &#39;</span> <span class="o">+</span> <span class="nx">server</span><span class="p">.</span><span class="nx">name</span><span class="p">);</span>
+            <span class="nx">server</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+        <span class="p">}</span>
+    <span class="p">});</span>
+
+    <span class="nx">log</span><span class="p">.</span><span class="nx">info</span><span class="p">(</span><span class="s1">&#39;ProxyServer closed ..&#39;</span><span class="p">);</span>
+    <span class="nx">redis</span><span class="p">.</span><span class="nx">quit</span><span class="p">();</span>
+    <span class="nx">process</span><span class="p">.</span><span class="nx">exit</span><span class="p">();</span>
+<span class="p">}</span></div></div></div></div></body></html>
